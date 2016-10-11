@@ -1,0 +1,9 @@
+## Interface: 70000
+## Title: HandyNotes_DungeonLocations
+## Version: @project-version@
+## Notes: Shows location of dungeon and raid entrances
+## Author: Bartruby of Cairne
+## RequiredDeps: HandyNotes
+## SavedVariables: HandyNotes_DungeonLocationsDB
+
+HandyNotes_DungeonLocations.lua
