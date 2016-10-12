@@ -1,6 +1,6 @@
 --[[
 Things to do
- Implement continent showing toggle
+ Implement continent showing toggle, option is there but does nothing
  Lump close dungeon/raids into one, (nexus/oculus/eoe)
 ]]--
 
@@ -16,6 +16,7 @@ local iconMerged = "Interface\\Addons\\HandyNotes_DungeonLocations\\merged.tga"
 
 local mapToContinent = { }
 local nodes = { }
+
 local internalNodes = {  -- List of zones to be excluded from continent map
  ["BlackrockMountain"] = true,
  ["CavernsofTime"] = true,
@@ -27,11 +28,11 @@ local internalNodes = {  -- List of zones to be excluded from continent map
  ["WailingCavernsBarrens"] = true,
 }
 
--- [COORD] = { Dungeonname/ID, Type(Dungeon/Raid/Merged), hideOnContinent(Bool) }
+-- [COORD] = { Dungeonname/ID, Type(Dungeon/Raid/Merged), hideOnContinent(Bool), other dungeons }
 -- VANILLA
 nodes["AhnQirajTheFallenKingdom"] = {
- [59001430] = { 743, "Raid" }, -- Ruins of Ahn'Qiraj Silithus 36509410, World 42308650
- [46800750] = { 744, "Raid" }, -- Temple of Ahn'Qiraj Silithus 24308730, World 40908570
+ [59001430] = { 743, "Raid", false }, -- Ruins of Ahn'Qiraj Silithus 36509410, World 42308650
+ [46800750] = { 744, "Raid", false }, -- Temple of Ahn'Qiraj Silithus 24308730, World 40908570
 }
 nodes["Ashenvale"] = {
  [16501100] = { 227, "Dungeon" }, -- Blackfathom Deeps 14101440 May look more accurate
@@ -43,7 +44,7 @@ nodes["Barrens"] = {
 [42106660] = { 240, "Dungeon" }, -- Wailing Caverns
 }
 nodes["BurningSteppes"] = {
- [20303260] = { "BRD\nMolten Core", "Merged" },
+ [20303260] = { 66, "Merged", false, 228, 229, 559, 741, 742 },
 }
 nodes["Desolace"] = {
  [29106250] = { 232, "Dungeon" }, -- Maraudon 29106250 Door at beginning
@@ -57,8 +58,14 @@ nodes["Dustwallow"] = {
 nodes["EasternPlaguelands"] = {
  [27201160] = { 236, "Dungeon" }, -- Stratholme World 52902870
 }
+nodes["Feralas"] = {
+ [65503530] = { 230, "Dungeon" }, -- Dire Maul
+}
+nodes["Orgrimmar"] = {
+ [52405800] = { 226, "Dungeon" }, -- Ragefire Chasm Cleft of Shadow 70104880
+}
 nodes["SearingGorge"] = {
- [41708580] = { "BRD\nMolen Core", "Merged" },
+ [41708580] = { 66, "Merged", true, 228, 229, 559, 741, 742 },
 }
 nodes["Silithus"] = {
  [36208420] = { 743, "Raid" }, -- Ruins of Ahn'Qiraj
@@ -77,7 +84,7 @@ nodes["SwampOfSorrows"] = {
  [69505250] = { 237, "Dungeon" }, -- The Temple of Atal'hakkar
 }
 nodes["Tanaris"] = {
- [65604870] = { "Culling of Stratholme\nThe Black Morass\nWell of Eternity\nMount Hyjal", "Merged" },
+ [65604870] = { 279, "Merged", false, 255, 251, 750, 184, 185, 186, 187 },
  --[[[61006210] = { "The Culling of Stratholme", "Dungeon" },  --65604870 May look more accurate and merge all CoT dungeons/raids
  [57006230] = { "The Black Morass", "Dungeon" },
  [54605880] = { 185, "Dungeon" }, -- Well of Eternity
@@ -122,7 +129,6 @@ nodes["DeadminesWestfall"] = {
 }
 nodes["MaraudonOutside"] = {
  [52102390] = { 232, "Dungeon" }, -- Maraudon 30205450 World
- [48005210] = { 232, "Dungeon" }, -- Maraudon NOT CORRECT, Idk
  [78605600] = { 232, "Dungeon" }, -- Maraudon 36006430
 }
 nodes["NewTinkertownStart"] = {
@@ -169,15 +175,15 @@ nodes["Sunwell"] = {
  [44304570] = { 752, "Raid" }, -- Sunwell Plateau World 55300380
 }
 nodes["Zangarmarsh"] = {
- [54203450] = { 262, "Dungeon" }, -- Underbog World 35804330
- [48903570] = { 260, "Dungeon" }, -- Slave Pens World 34204370
- [51903280] = { 748, "Raid" }, -- Serpentshrine Cavern World 35104280
- [50204100] = { "Underbog\nSlave Pens", "Merged" }, -- Merged Location
+ --[54203450] = { 262, "Dungeon" }, -- Underbog World 35804330
+ --[48903570] = { 260, "Dungeon" }, -- Slave Pens World 34204370
+ --[51903280] = { 748, "Raid" }, -- Serpentshrine Cavern World 35104280
+ [50204100] = { 262, "Merged", false, 260, 748 }, -- Merged Location
 }
 
 -- NORTHREND (16 Dungeons, 9 Raids)
 nodes["BoreanTundra"] = {
- [27602660] = { "The Eye of Eternity\nOculus\nThe Nexus", "Merged" },
+ [27602660] = { 282, "Merged", false, 756, 281 },
  -- Oculus same as eye of eternity
  --[27502610] = { "The Nexus", "Dungeon" },
 }
@@ -229,7 +235,7 @@ nodes["TwilightHighlands"] = {
  [34007800] = { 72, "Raid" }, -- The Bastion of Twilight World 55005920
 }
 nodes["Uldum"] = {
- [76808450] = { 68, "Dungeon" }, -- The Vortex Pinnacle
+ [76808450] = { 68, "Dungeon", false }, -- The Vortex Pinnacle
  [60506430] = { 69, "Dungeon" }, -- Lost City of Tol'Vir
  [69105290] = { 70, "Dungeon" }, -- Halls of Origination
  [38308060] = { 74, "Raid" }, -- Throne of the Four Winds
@@ -428,16 +434,31 @@ function Addon:PLAYER_LOGIN()
  -- Populate Dungeon/Raid names based on Journal
  for i,v in pairs(nodes) do
   for j,u in pairs(v) do
-   if (type(u[1]) == "number") then
+   --[[if (type(u[1]) == "number") then
     local name = EJ_GetInstanceInfo(u[1])
     u[1] = name
+   end ]]--
+   --if (u[2] == "Merged") then
+   local n = 4 -- Start of merged dungeons/raids
+   local newName = EJ_GetInstanceInfo(u[1])
+   while(u[n]) do
+	if (type(u[n]) == "number") then
+	 local name = EJ_GetInstanceInfo(u[n])
+	 newName = newName .. "\n" .. name
+	else
+	 newName = newName .. "\n" .. u[n]
+	end
+	u[n] = nil
+	n = n + 1
    end
+   u[1] = newName
   end
  end
  
  local HereBeDragons = LibStub("HereBeDragons-1.0") -- Phanx
  local continents = { GetMapContinents() }
- for mapFile, coords in next, nodes do
+ local temp = { } -- I switched to the temp table because modifying the nodes table while iterating over it sometimes stopped it short for some reason
+ for mapFile, coords in pairs(nodes) do
   if not continents[mapFile] and not (internalNodes[mapFile]) then
    if (DEBUG) then print(mapFile) end
    local continentMapID = continents[2 * HandyNotes:GetCZ(mapFile) - 1]
@@ -449,11 +470,14 @@ function Addon:PLAYER_LOGIN()
      x, y = HereBeDragons:GetWorldCoordinatesFromZone(x, y, mapFile)
      x, y = HereBeDragons:GetZoneCoordinatesFromWorld(x, y, continentMapID)
      if x and y then
-      nodes[continentMapFile] = nodes[continentMapFile] or {}
-      nodes[continentMapFile][HandyNotes:getCoord(x, y)] = criteria
+      temp[continentMapFile] = temp[continentMapFile] or {}
+      temp[continentMapFile][HandyNotes:getCoord(x, y)] = criteria
 	 end
-    end
+	end
    end
   end
+ end
+ for mapFile, coords in pairs(temp) do
+   nodes[mapFile] = coords
  end
 end
