@@ -35,7 +35,8 @@ nodes["AhnQirajTheFallenKingdom"] = {
  [46800750] = { 744, "Raid", false }, -- Temple of Ahn'Qiraj Silithus 24308730, World 40908570
 }
 nodes["Ashenvale"] = {
- [16501100] = { 227, "Dungeon" }, -- Blackfathom Deeps 14101440 May look more accurate
+ --[16501100] = { 227, "Dungeon" }, -- Blackfathom Deeps 14101440 May look more accurate
+ [14001310] = { 227, "Dungeon" }, -- Blackfathom Deeps, not at portal but look
 }
 nodes["Badlands"] = {
  [41801130] = { 239, "Dungeon" }, -- Uldaman
@@ -97,15 +98,22 @@ nodes["Tanaris"] = {
 }
 nodes["Tirisfal"] = {
  [85303220] = { 311, "Dungeon", true }, -- Scarlet Halls
- [84903060] = { 316, "Dungeon" }, -- Scarlet Monastery
+ [84903060] = { 316, "Dungeon", true }, -- Scarlet Monastery
 }
 nodes["WesternPlaguelands"] = {
  [69007290] = { 246, "Dungeon" }, -- Scholomance World 50903650
 }
 nodes["Westfall"] = {
- [38307750] = { 63, "Dungeon" }, -- Deadmines 43707320  May look more accurate
+ --[38307750] = { 63, "Dungeon" }, -- Deadmines 43707320  May look more accurate
+ [43107390] = { 63, "Dungeon" }, -- Deadmines
 }
 
+-- Vanilla Continent, for things that should be merged on continent but not zone
+ nodes["Azeroth"] = {
+  [46603050] = { 311, "Dungeon", false, 316 } -- Scarlet Halls/Monastery
+ }
+
+-- Vanilla Subzone maps
 nodes["BlackrockMountain"] = {
  [71305340] = { 66, "Dungeon" }, -- Blackrock Caverns
  [38701880] = { 228, "Dungeon" }, -- Blackrock Depths
@@ -355,10 +363,41 @@ do
 	 end
 	function pluginHandler:GetNodes(mapFile, isMinimapUpdate, dungeonLevel)
 		if (DEBUG) then print(mapFile) end
+		local isContinent = continents[mapFile]
 		scale = isContinent and db.continentScale or db.zoneScale
 		alpha = isContinent and db.continentAlpha or db.zoneAlpha
-		return iter, nodes[mapFile]
+		if (isContinent and not db.continent) then
+		 return iter
+		else
+		 return iter, nodes[mapFile]
+		end
 	end
+end
+
+local waypoints = {}
+local function setWaypoint(mapFile, coord)
+	local dungeon = nodes[mapFile][coord]
+
+	local waypoint = nodes[dungeon]
+	if waypoint and TomTom:IsValidWaypoint(waypoint) then
+		return
+	end
+
+	local title = dungeon[1]
+	local zone = HandyNotes:GetMapFiletoMapID(mapFile)
+	local x, y = HandyNotes:getXY(coord)
+	waypoints[dungeon] = TomTom:AddMFWaypoint(zone, nil, x, y, {
+		title = dungeon[1],
+		persistent = nil,
+		minimap = true,
+		world = true
+	})
+end
+
+function pluginHandler:OnClick(button, pressed, mapFile, coord)
+ if button == "RightButton" and db.tomtom and TomTom then
+  setWaypoint(mapFile, coord)
+ end
 end
 
 local defaults = {
@@ -368,6 +407,7 @@ local defaults = {
   continentScale = 2,
   continentAlpha = 1,
   continent = true,
+  tomtom = true,
  },
 }
 
@@ -387,7 +427,7 @@ local options = {
    type = "range",
    name = "Zone Scale",
    desc = "The scale of the icons shown on the zone map",
-   min = 0.25, max = 12, step = 0.1,
+   min = 0.2, max = 12, step = 0.1,
    order = 10,
   },
   zoneAlpha = {
@@ -401,7 +441,7 @@ local options = {
    type = "range",
    name = "Continent Scale",
    desc = "The scale of the icons shown on the continent map",
-   min = 0.25, max = 12, step = 0.1,
+   min = 0.2, max = 12, step = 0.1,
    order = 10,
   },
   continentAlpha = {
@@ -415,6 +455,12 @@ local options = {
    type = "toggle",
    name = "Show on Continent",
    desc = "Show icons on continent map",
+   order = 1,
+  },
+  tomtom = {
+   type = "toggle",
+   name = "Enable TomTom integration",
+   desc = "Allow right click to create waypoints with TomTom",
    order = 2,
   },
  },
