@@ -1,7 +1,7 @@
 ## Interface: 70000
 ## Title: HandyNotes_DungeonLocations
 ## Version: @project-version@
-## Notes: Shows location of dungeon and raid entrances
+## Notes: Shows locations of old world dungeon and raid entrances
 ## Author: Bartruby of Cairne
 ## RequiredDeps: HandyNotes
 ## SavedVariables: HandyNotes_DungeonLocationsDB
