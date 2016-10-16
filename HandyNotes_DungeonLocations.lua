@@ -1,7 +1,7 @@
 --[[
 Things to do
- Implement continent showing toggle, option is there but does nothing
  Lump close dungeon/raids into one, (nexus/oculus/eoe)
+ Maybe implement lockout info on tooltip (Don't know if I want too, better addons for tracking it exist)
 ]]--
 
 local DEBUG = false
@@ -16,6 +16,14 @@ local iconMerged = "Interface\\Addons\\HandyNotes_DungeonLocations\\merged.tga"
 
 local mapToContinent = { }
 local nodes = { }
+local minimap = { } -- For nodes that need precise minimap locations but would look wrong on zone or continent maps
+--local lockouts = { }
+
+if (DEBUG) then
+ HNDL_NODES = nodes
+ HNDL_MINIMAP = minimap
+ --HNDL_LOCKOUTS = lockouts
+end
 
 local internalNodes = {  -- List of zones to be excluded from continent map
  ["BlackrockMountain"] = true,
@@ -31,8 +39,8 @@ local internalNodes = {  -- List of zones to be excluded from continent map
 -- [COORD] = { Dungeonname/ID, Type(Dungeon/Raid/Merged), hideOnContinent(Bool), other dungeons }
 -- VANILLA
 nodes["AhnQirajTheFallenKingdom"] = {
- [59001430] = { 743, "Raid", false }, -- Ruins of Ahn'Qiraj Silithus 36509410, World 42308650
- [46800750] = { 744, "Raid", false }, -- Temple of Ahn'Qiraj Silithus 24308730, World 40908570
+ [59001430] = { 743, "Raid", true }, -- Ruins of Ahn'Qiraj Silithus 36509410, World 42308650
+ [46800750] = { 744, "Raid", true }, -- Temple of Ahn'Qiraj Silithus 24308730, World 40908570
 }
 nodes["Ashenvale"] = {
  --[16501100] = { 227, "Dungeon" }, -- Blackfathom Deeps 14101440 May look more accurate
@@ -46,6 +54,9 @@ nodes["Barrens"] = {
 }
 nodes["BurningSteppes"] = {
  [20303260] = { 66, "Merged", false, 228, 229, 559, 741, 742 },
+}
+nodes["DeadwindPass"] = {
+ [46907470] = { 745, "Raid" }
 }
 nodes["Desolace"] = {
  [29106250] = { 232, "Dungeon" }, -- Maraudon 29106250 Door at beginning
@@ -75,11 +86,17 @@ nodes["Silithus"] = {
 nodes["Silverpine"] = {
  [44806780] = { 64, "Dungeon" }, -- Shadowfang Keep
 }
+nodes["SouthernBarrens"] = {
+ [40909450] = { 234, "Dungeon" }, -- Razorfen Kraul
+}
 nodes["StormwindCity"] = {
  [50406640] = { 238, "Dungeon" }, -- The Stockade
 }
 nodes["StranglethornJungle"] = {
  [72203290] = { 76, "Dungeon" }, -- Zul'Gurub
+}
+nodes["StranglethornVale"] = { -- Jungle and Cape are subzones of this zone (weird)
+ [63402180] = { 76, "Dungeon" }, -- Zul'Gurub
 }
 nodes["SwampOfSorrows"] = {
  [69505250] = { 237, "Dungeon" }, -- The Temple of Atal'hakkar
@@ -100,6 +117,9 @@ nodes["Tirisfal"] = {
  [85303220] = { 311, "Dungeon", true }, -- Scarlet Halls
  [84903060] = { 316, "Dungeon", true }, -- Scarlet Monastery
 }
+nodes["ThousandNeedles"] = {
+ [47402360] = { 233, "Dungeon" }, -- Razorfen Downs
+}
 nodes["WesternPlaguelands"] = {
  [69007290] = { 246, "Dungeon" }, -- Scholomance World 50903650
 }
@@ -108,9 +128,10 @@ nodes["Westfall"] = {
  [43107390] = { 63, "Dungeon" }, -- Deadmines
 }
 
--- Vanilla Continent, for things that should be merged on continent but not zone
+-- Vanilla Continent, For things that should be shown or merged only at the continent level
  nodes["Azeroth"] = {
-  [46603050] = { 311, "Dungeon", false, 316 } -- Scarlet Halls/Monastery
+  [46603050] = { 311, "Dungeon", false, 316 }, -- Scarlet Halls/Monastery
+  --[38307750] = { 63, "Dungeon" }, -- Deadmines 43707320,
  }
 
 -- Vanilla Subzone maps
@@ -136,8 +157,9 @@ nodes["DeadminesWestfall"] = {
  [25505090] = { 63, "Dungeon" }, -- Deadmines
 }
 nodes["MaraudonOutside"] = {
- [52102390] = { 232, "Dungeon" }, -- Maraudon 30205450 World
- [78605600] = { 232, "Dungeon" }, -- Maraudon 36006430
+ [52102390] = { 232, "Dungeon", false, "Purple Entrance" }, -- Maraudon 30205450 
+ [78605600] = { 232, "Dungeon", false, "Orange Entrance" }, -- Maraudon 36006430
+ [44307680] = { 232, "Dungeon", false, "Earth Song Falls Entrance" },  -- Maraudon
 }
 nodes["NewTinkertownStart"] = {
  [31703450] = { 231, "Dungeon" }, -- Gnomeregan
@@ -186,7 +208,13 @@ nodes["Zangarmarsh"] = {
  --[54203450] = { 262, "Dungeon" }, -- Underbog World 35804330
  --[48903570] = { 260, "Dungeon" }, -- Slave Pens World 34204370
  --[51903280] = { 748, "Raid" }, -- Serpentshrine Cavern World 35104280
- [50204100] = { 262, "Merged", false, 260, 748 }, -- Merged Location
+ [50204100] = { 260, "Merged", false, 261, 262, 748 }, -- Merged Location
+}
+minimap["Zangarmarsh"] = {
+ [48903570] = { 260, "Dungeon" }, -- Slave Pens World 34204370
+ [50303330] = { 261, "Dungeon" }, -- The Steamvault
+ [54203450] = { 262, "Dungeon" }, -- Underbog World 35804330
+ [51903280] = { 748, "Raid" }, -- Serpentshrine Cavern World 35104280
 }
 
 -- NORTHREND (16 Dungeons, 9 Raids)
@@ -206,16 +234,15 @@ nodes["Dragonblight"] = {
  [60005690] = { 755, "Raid" }, -- The Obsidian Sanctum
 }
 nodes["HowlingFjord"] = {
- [57304680] = { 285, "Dungeon" }, -- Utgarde Keep
+ --[57304680] = { 285, "Dungeon" }, -- Utgarde Keep, more accurate but right underneath Utgarde Pinnacle
+ [58005000] = { 285, "Dungeon" }, -- Utgarde Keep, at doorway entrance
  [57204660] = { 286, "Dungeon" }, -- Utgarde Pinnacle
 }
-nodes["IcecrownGlacier"] = {
- [53808720] = { 758, "Raid" }, -- Icecrown Citadel
- [54908980] = { 280, "Dungeon" }, -- The Forge of Souls
- [55409080] = { 276, "Dungeon" }, -- Halls of Reflection
- [54809180] = { 278, "Dungeon" }, -- Pit of Saron 54409070 Summoning stone in the middle of last 3 dungeons
- [75202180] = { 757, "Raid" }, -- Trial of the Crusader
+nodes["IcecrownGlacier"] = { 
+ [54409070] = { 276, "Dungeon", false, 278, 280 }, -- The Forge of Souls, Halls of Reflection, Pit of Saron
  [74202040] = { 284, "Dungeon" }, -- Trial of the Champion
+ [75202180] = { 757, "Raid" }, -- Trial of the Crusader
+ [53808720] = { 758, "Raid" }, -- Icecrown Citadel
 }
 nodes["LakeWintergrasp"] = {
  [50001160] = { 753, "Raid" }, -- Vault of Archavon
@@ -233,6 +260,18 @@ nodes["ZulDrak"] = {
 nodes["Dalaran"] = {
  [68407000] = { 283, "Dungeon" }, -- The Violet Hold
 }
+
+-- NORTHREND MINIMAP, For things that would be too crowded on the continent or zone maps but look correct on the minimap
+minimap["IcecrownGlacier"] = {
+ [54908980] = { 280, "Dungeon", true }, -- The Forge of Souls
+ [55409080] = { 276, "Dungeon", true }, -- Halls of Reflection
+ [54809180] = { 278, "Dungeon", true }, -- Pit of Saron 54409070 Summoning stone in the middle of last 3 dungeons
+}
+
+-- NORTHREND CONTINENT, For things that should be shown or merged only at the continent level
+--[[nodes["Northrend"] = {
+ --[80407600] = { 285, "Dungeon", false, 286 }, -- Utgarde Keep, Utgarde Pinnacle CONTINENT MERGE Location is slightly incorrect
+}]]--
 
 -- CATACLYSM
 nodes["Hyjal"] = {
@@ -315,7 +354,17 @@ local continents = {
 
 local pluginHandler = { }
 function pluginHandler:OnEnter(mapFile, coord) -- Copied from handynotes
-    if (not nodes[mapFile][coord]) then return end
+ --GameTooltip:AddLine("text" [, r [, g [, b [, wrap]]]])
+ -- Maybe check for situations where minimap and node coord overlaps
+    local nodeData = nil
+    --if (not nodes[mapFile][coord]) then return end
+	if (minimap[mapFile] and minimap[mapFile][coord]) then
+	 nodeData = minimap[mapFile][coord]
+	end
+	if (nodes[mapFile] and nodes[mapFile][coord]) then
+	 nodeData = nodes[mapFile][coord]
+	end
+	if (not nodeData) then return end
 	
 	local tooltip = self:GetParent() == WorldMapButton and WorldMapTooltip or GameTooltip
 	if ( self:GetCenter() > UIParent:GetCenter() ) then -- compare X coordinate
@@ -324,10 +373,17 @@ function pluginHandler:OnEnter(mapFile, coord) -- Copied from handynotes
 		tooltip:SetOwner(self, "ANCHOR_RIGHT")
 	end
 
-	tooltip:SetText(nodes[mapFile][coord][1])
-	if (nodes[mapFile][coord][3] ~= nil) then
-	 tooltip:AddLine(nodes[mapFile][coord][3], nil, nil, nil, true)
+	tooltip:SetText(nodeData[1])
+	if (nodeData[3] ~= nil) then
+	 tooltip:AddLine(nodeData[3], nil, nil, nil, true)
 	end
+	
+	--if (lockouts[nodeData[1]]) then
+	-- for i,v in pairs(lockouts[nodeData[1]]) do
+	-- local name, groupType, isHeroic, isChallengeMode, displayHeroic, displayMythic, toggleDifficultyID = GetDifficultyInfo(i)
+	--  tooltip:AddLine(name .. " - (" .. v[1] .. "/" .. v[2] .. ")")
+	-- end
+	--end
 	tooltip:Show()
 end
 
@@ -341,37 +397,40 @@ end
 
 do
  local scale, alpha
-	local function iter(t, prestate)
-	  if not t then return nil end
+ local function iter(t, prestate)
+ if not t then return nil end
 		
-	  local state, value = next(t, prestate)
-	  while state do
-	  local icon
-	  if (value[2] == "Dungeon") then
-	   icon = iconDungeon
-	  elseif (value[2] == "Raid") then
-	   icon = iconRaid
-	  elseif (value[2] == "Merged") then
-	   icon = iconMerged
-	  else
-	   icon = iconDefault
-	  end
+ local state, value = next(t, prestate)
+ while state do
+  local icon
+  if (value[2] == "Dungeon") then
+   icon = iconDungeon
+  elseif (value[2] == "Raid") then
+   icon = iconRaid
+  elseif (value[2] == "Merged") then
+   icon = iconMerged
+  else
+   icon = iconDefault
+  end
 		
-	   return state, nil, icon, scale, alpha
-	  end
-      state, value = next(t, state)
-	 end
-	function pluginHandler:GetNodes(mapFile, isMinimapUpdate, dungeonLevel)
-		if (DEBUG) then print(mapFile) end
-		local isContinent = continents[mapFile]
-		scale = isContinent and db.continentScale or db.zoneScale
-		alpha = isContinent and db.continentAlpha or db.zoneAlpha
-		if (isContinent and not db.continent) then
-		 return iter
-		else
-		 return iter, nodes[mapFile]
-		end
-	end
+   return state, nil, icon, scale, alpha
+  end
+  state, value = next(t, state)
+ end
+ function pluginHandler:GetNodes(mapFile, isMinimapUpdate, dungeonLevel)
+  if (DEBUG) then print(mapFile) end
+  local isContinent = continents[mapFile]
+  scale = isContinent and db.continentScale or db.zoneScale
+  alpha = isContinent and db.continentAlpha or db.zoneAlpha
+  if (isMinimapUpdate and minimap[mapFile]) then
+   return iter, minimap[mapFile]
+  end
+  if (isContinent and not db.continent) then
+   return iter
+  else
+   return iter, nodes[mapFile]
+  end
+ end
 end
 
 local waypoints = {}
@@ -476,6 +535,8 @@ function Addon:PLAYER_LOGIN()
  self.db = LibStub("AceDB-3.0"):New("HandyNotes_DungeonLocationsDB", defaults, true)
  db = self.db.profile
  
+ self:PopulateMinimap()
+ 
  --name, description, bgImage, buttonImage, loreImage, dungeonAreaMapID, link = EJ_GetInstanceInfo([instanceID])
  -- Populate Dungeon/Raid names based on Journal
  for i,v in pairs(nodes) do
@@ -498,6 +559,14 @@ function Addon:PLAYER_LOGIN()
 	n = n + 1
    end
    u[1] = newName
+  end
+ end
+ 
+ for i,v in pairs(minimap) do
+  for j,u in pairs(v) do
+   if (type(u[1]) == "number") then -- Added because since some nodes are connected to the node table they were being changed before this and this function was then messing it up
+    u[1] = EJ_GetInstanceInfo(u[1])
+   end
   end
  end
  
@@ -526,4 +595,37 @@ function Addon:PLAYER_LOGIN()
  for mapFile, coords in pairs(temp) do
    nodes[mapFile] = coords
  end
+ 
+ --self:UpdateLockouts()
 end
+
+-- I only put a few specific nodes on the minimap, so if the minimap is used in a zone then I need to add all zone nodes to it except for the specific ones
+-- This could also probably be done better maybe
+function Addon:PopulateMinimap()
+ local temp = { }
+ for k,v in pairs(nodes) do
+  if (minimap[k]) then
+   for a,b in pairs(minimap[k]) do
+	temp[b[1]] = true
+   end
+   for c,d in pairs(v) do
+    if (not temp[d[1]]) then
+	 minimap[k][c] = d
+	end
+   end
+  end
+ end
+end
+
+-- Looked to see what events SavedInstances was using, seems far more involved than what I am willing to do
+--[[function Addon:UpdateLockouts()
+ table.wipe(lockouts)
+ 
+ for i=1,GetNumSavedInstances() do
+  local name, id, reset, difficulty, locked, extended, instanceIDMostSig, isRaid, maxPlayers, difficultyName, numEncounters, encounterProgress = GetSavedInstanceInfo(i)
+  if (locked) then
+   if (not lockouts[name]) then lockouts[name] = { } end
+   lockouts[name][difficulty] = { encounterProgress, numEncounters }
+  end
+ end
+end ]]--
