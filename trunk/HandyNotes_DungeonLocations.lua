@@ -53,7 +53,8 @@ nodes["Barrens"] = {
 [42106660] = { 240, "Dungeon" }, -- Wailing Caverns
 }
 nodes["BurningSteppes"] = {
- [20303260] = { 66, "Merged", false, 228, 229, 559, 741, 742 },
+ [20303260] = { 66, "Merged", true, 228, 229, 559, 741, 742 }, -- Blackrock mountain dungeons and raids
+ [23202630] = { 73, "Raid", true }, -- Blackwind Descent
 }
 nodes["DeadwindPass"] = {
  [46907470] = { 745, "Raid" }
@@ -78,6 +79,7 @@ nodes["Orgrimmar"] = {
 }
 nodes["SearingGorge"] = {
  [41708580] = { 66, "Merged", true, 228, 229, 559, 741, 742 },
+ [43508120] = { 73, "Raid", true }, -- Blackwind Descent
 }
 nodes["Silithus"] = {
  [36208420] = { 743, "Raid" }, -- Ruins of Ahn'Qiraj
@@ -131,6 +133,7 @@ nodes["Westfall"] = {
 -- Vanilla Continent, For things that should be shown or merged only at the continent level
  nodes["Azeroth"] = {
   [46603050] = { 311, "Dungeon", false, 316 }, -- Scarlet Halls/Monastery
+  [47316942] = { 66, "Merged", false, 73, 228, 229, 559, 741, 742 }, -- Blackrock mount instances, merged in blackwind descent at continent level
   --[38307750] = { 63, "Dungeon" }, -- Deadmines 43707320,
  }
 
@@ -180,10 +183,11 @@ nodes["Ghostlands"] = {
  [85206430] = { 77, "Dungeon" }, -- Zul'Aman World 58302480
 }
 nodes["Hellfire"] = {
- [47505210] = { 747, "Raid" }, -- Magtheridon's Lair World 56705270
- [47605360] = { 248, "Dungeon" }, -- Hellfire Ramparts World 56805310 Stone 48405240 World 57005280
- [47505200] = { 259, "Dungeon" }, -- The Shattered Halls World 56705270
- [46005180] = { 256, "Dungeon" }, -- The Blood Furnace World 56305260
+ --[47505210] = { 747, "Raid" }, -- Magtheridon's Lair World 56705270
+ --[47605360] = { 248, "Dungeon" }, -- Hellfire Ramparts World 56805310 Stone 48405240 World 57005280
+ --[47505200] = { 259, "Dungeon" }, -- The Shattered Halls World 56705270
+ --[46005180] = { 256, "Dungeon" }, -- The Blood Furnace World 56305260
+ [47205220] = { 248, "Merged", false, 256, 259, 747 }, -- Hellfire Ramparts, The Blood Furnace, The Shattered Halls, Magtheridon's Lair
 }
 nodes["Netherstorm"] = {
  [71705500] = { 257, "Dungeon" }, -- The Botanica
@@ -209,6 +213,12 @@ nodes["Zangarmarsh"] = {
  --[48903570] = { 260, "Dungeon" }, -- Slave Pens World 34204370
  --[51903280] = { 748, "Raid" }, -- Serpentshrine Cavern World 35104280
  [50204100] = { 260, "Merged", false, 261, 262, 748 }, -- Merged Location
+}
+minimap["Hellfire"] = {
+ [47605360] = { 248, "Dungeon" }, -- Hellfire Ramparts World 56805310 Stone 48405240 World 57005280
+ [46005180] = { 256, "Dungeon" }, -- The Blood Furnace World 56305260
+ [48405180] = { 259, "Dungeon" }, -- The Shattered Halls World 56705270, Old 47505200.  Adjusted for clarity
+ [46405290] = { 747, "Raid" }, -- Magtheridon's Lair World 56705270, Old 47505210.  Adjusted for clarity
 }
 minimap["Zangarmarsh"] = {
  [48903570] = { 260, "Dungeon" }, -- Slave Pens World 34204370
@@ -274,25 +284,37 @@ minimap["IcecrownGlacier"] = {
 }]]--
 
 -- CATACLYSM
+nodes["Deepholm"] = {
+ [47405210] = { 67, "Dungeon" }, -- The Stonecore (Maelstrom: 51002790)
+}
 nodes["Hyjal"] = {
  [47307810] = { 78, "Raid" }, -- Firelands
+}
+nodes["TolBarad"] = {
+ [46104790] = { 75, "Raid" }, -- Baradin Hold
 }
 nodes["TwilightHighlands"] = {
  [19105390] = { 71, "Dungeon" }, -- Grim Batol World 53105610
  [34007800] = { 72, "Raid" }, -- The Bastion of Twilight World 55005920
 }
 nodes["Uldum"] = {
- [76808450] = { 68, "Dungeon", false }, -- The Vortex Pinnacle
+ [76808450] = { 68, "Dungeon" }, -- The Vortex Pinnacle
  [60506430] = { 69, "Dungeon" }, -- Lost City of Tol'Vir
  [69105290] = { 70, "Dungeon" }, -- Halls of Origination
  [38308060] = { 74, "Raid" }, -- Throne of the Four Winds
+}
+nodes["Vashjir"] = {
+ [48204040] =  { 65, "Dungeon", true }, -- Throne of Tides
+}
+nodes["VashjirDepths"] = {
+ [69302550] = { 65, "Dungeon" }, -- Throne of Tides
 }
 -- PANDARIA
 nodes["DreadWastes"] = {
  [38803500] = { 330, "Raid" }, -- Heart of Fear
 }
 nodes["IsleoftheThunderKing"] = {
- [63603230] = { 362, "Raid" }, -- Throne of Thunder
+ [63603230] = { 362, "Raid", true }, -- Throne of Thunder
 }
 nodes["KunLaiSummit"] = {
  [59503920] = { 317, "Raid" }, -- Mogu'shan Vaults
@@ -314,6 +336,11 @@ nodes["ValeofEternalBlossoms"] = {
 }
 nodes["ValleyoftheFourWinds"] = {
  [36106920] = { 302, "Dungeon" }, -- Stormstout Brewery
+}
+
+-- PANDARIA Continent, For things that should be shown or merged only at the continent level
+nodes["Pandaria"] = {
+ [23100860] = { 362, "Raid" }, -- Throne of Thunder, looked weird so manually placed on continent
 }
 
 -- DRAENOR

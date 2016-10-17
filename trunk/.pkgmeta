@@ -1,4 +1,7 @@
 package-as: HandyNotes_DungeonLocations
 
+ignore:
+ - tools
+
 required-dependencies:
  - HandyNotes
