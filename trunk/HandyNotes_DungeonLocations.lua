@@ -441,8 +441,8 @@ do
   end
 		
    return state, nil, icon, scale, alpha
+   --state, value = next(t, state)
   end
-  state, value = next(t, state)
  end
  function pluginHandler:GetNodes(mapFile, isMinimapUpdate, dungeonLevel)
   if (DEBUG) then print(mapFile) end
