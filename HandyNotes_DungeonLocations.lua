@@ -57,7 +57,8 @@ nodes["BurningSteppes"] = {
  [23202630] = { 73, "Raid", true }, -- Blackwind Descent
 }
 nodes["DeadwindPass"] = {
- [46907470] = { 745, "Raid" }
+ [46907470] = { 745, "Raid", true }, -- Karazhan
+ [46707020] = { 860, "Dungeon", true }, -- Return to Karazhan
 }
 nodes["Desolace"] = {
  [29106250] = { 232, "Dungeon" }, -- Maraudon 29106250 Door at beginning
@@ -135,6 +136,7 @@ nodes["Westfall"] = {
   [46603050] = { 311, "Dungeon", false, 316 }, -- Scarlet Halls/Monastery
   [47316942] = { 66, "Merged", false, 73, 228, 229, 559, 741, 742 }, -- Blackrock mount instances, merged in blackwind descent at continent level
   --[38307750] = { 63, "Dungeon" }, -- Deadmines 43707320,
+  [49508190] = { 745, "Merged", false, 860 }, -- Karazhan/Return to Karazhan
  }
 
 -- Vanilla Subzone maps
@@ -367,6 +369,18 @@ nodes["Talador"] = {
 }
 nodes["TanaanJungle"] = {
  [45605360] = { 669, "Raid" }, -- Hellfire Citadel
+}
+
+-- Legion Dungeons/Raids for continent map for consistency
+nodes["BrokenIsles"] = {
+ [38805780] = { 716, "Dungeon" }, -- Eye of Azshara
+ [34207210] = { 707, "Dungeon" }, -- Vault of the Wardens
+ [47302810] = { 767, "Dungeon" }, -- Neltharion's Lair
+ [59003060] = { 727, "Dungeon" }, -- Maw of Souls
+ [35402850] = { 762, "Merged", false, 768}, -- The Emerald Nightmare 35102910
+ [65003870] = { 721, "Merged", false, 861 }, -- Halls of Valor/Trial of Valor Unmerged: 65203840 64703900
+ [46704780] = { 726, "Merged", false, 786 }, -- The Arcway/The Nighthold
+ [49104970] = { 800, "Dungeon" }, -- Court of Stars
 }
 
 local continents = {
