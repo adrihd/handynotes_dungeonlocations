@@ -14,6 +14,7 @@ local iconDungeon = "Interface\\Addons\\HandyNotes_DungeonLocations\\dungeon.tga
 local iconRaid = "Interface\\Addons\\HandyNotes_DungeonLocations\\raid.tga"
 local iconMerged = "Interface\\Addons\\HandyNotes_DungeonLocations\\merged.tga"
 
+local db
 local mapToContinent = { }
 local nodes = { }
 local minimap = { } -- For nodes that need precise minimap locations but would look wrong on zone or continent maps
@@ -381,6 +382,7 @@ nodes["BrokenIsles"] = {
  [65003870] = { 721, "Merged", false, 861 }, -- Halls of Valor/Trial of Valor Unmerged: 65203840 64703900
  [46704780] = { 726, "Merged", false, 786 }, -- The Arcway/The Nighthold
  [49104970] = { 800, "Dungeon" }, -- Court of Stars
+ [29403300] = { 740, "Dungeon" }, -- Black Rook Hold
 }
 
 local continents = {
@@ -437,7 +439,7 @@ function pluginHandler:OnLeave(mapFile, coord)
 end
 
 do
- local scale, alpha
+ local scale, alpha = 1, 1
  local function iter(t, prestate)
  if not t then return nil end
 		
@@ -463,6 +465,7 @@ do
   local isContinent = continents[mapFile]
   scale = isContinent and db.continentScale or db.zoneScale
   alpha = isContinent and db.continentAlpha or db.zoneAlpha
+
   if (isMinimapUpdate and minimap[mapFile]) then
    return iter, minimap[mapFile]
   end
