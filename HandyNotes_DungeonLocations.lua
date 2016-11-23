@@ -20,6 +20,8 @@ local nodes = { }
 local minimap = { } -- For nodes that need precise minimap locations but would look wrong on zone or continent maps
 --local lockouts = { }
 
+local MERGED_DUNGEONS = 5 -- Where extra dungeon/raids ids start for merging
+
 if (DEBUG) then
  HNDL_NODES = nodes
  HNDL_MINIMAP = minimap
@@ -37,7 +39,7 @@ local internalNodes = {  -- List of zones to be excluded from continent map
  ["WailingCavernsBarrens"] = true,
 }
 
--- [COORD] = { Dungeonname/ID, Type(Dungeon/Raid/Merged), hideOnContinent(Bool), other dungeons }
+-- [COORD] = { Dungeonname/ID, Type(Dungeon/Raid/Merged), hideOnContinent(Bool), nil placeholder for id later, other dungeons }
 -- VANILLA
 nodes["AhnQirajTheFallenKingdom"] = {
  [59001430] = { 743, "Raid", true }, -- Ruins of Ahn'Qiraj Silithus 36509410, World 42308650
@@ -54,7 +56,7 @@ nodes["Barrens"] = {
 [42106660] = { 240, "Dungeon" }, -- Wailing Caverns
 }
 nodes["BurningSteppes"] = {
- [20303260] = { 66, "Merged", true, 228, 229, 559, 741, 742 }, -- Blackrock mountain dungeons and raids
+ [20303260] = { 66, "Merged", true, nil, 228, 229, 559, 741, 742 }, -- Blackrock mountain dungeons and raids
  [23202630] = { 73, "Raid", true }, -- Blackwind Descent
 }
 nodes["DeadwindPass"] = {
@@ -80,7 +82,7 @@ nodes["Orgrimmar"] = {
  [52405800] = { 226, "Dungeon" }, -- Ragefire Chasm Cleft of Shadow 70104880
 }
 nodes["SearingGorge"] = {
- [41708580] = { 66, "Merged", true, 228, 229, 559, 741, 742 },
+ [41708580] = { 66, "Merged", true, nil, 228, 229, 559, 741, 742 },
  [43508120] = { 73, "Raid", true }, -- Blackwind Descent
 }
 nodes["Silithus"] = {
@@ -106,7 +108,7 @@ nodes["SwampOfSorrows"] = {
  [69505250] = { 237, "Dungeon" }, -- The Temple of Atal'hakkar
 }
 nodes["Tanaris"] = {
- [65604870] = { 279, "Merged", false, 255, 251, 750, 184, 185, 186, 187 },
+ [65604870] = { 279, "Merged", false, nil, 255, 251, 750, 184, 185, 186, 187 },
  --[[[61006210] = { "The Culling of Stratholme", "Dungeon" },  --65604870 May look more accurate and merge all CoT dungeons/raids
  [57006230] = { "The Black Morass", "Dungeon" },
  [54605880] = { 185, "Dungeon" }, -- Well of Eternity
@@ -134,10 +136,10 @@ nodes["Westfall"] = {
 
 -- Vanilla Continent, For things that should be shown or merged only at the continent level
  nodes["Azeroth"] = {
-  [46603050] = { 311, "Dungeon", false, 316 }, -- Scarlet Halls/Monastery
-  [47316942] = { 66, "Merged", false, 73, 228, 229, 559, 741, 742 }, -- Blackrock mount instances, merged in blackwind descent at continent level
+  [46603050] = { 311, "Dungeon", false, nil, 316 }, -- Scarlet Halls/Monastery
+  [47316942] = { 66, "Merged", false, nil, 73, 228, 229, 559, 741, 742 }, -- Blackrock mount instances, merged in blackwind descent at continent level
   --[38307750] = { 63, "Dungeon" }, -- Deadmines 43707320,
-  [49508190] = { 745, "Merged", false, 860 }, -- Karazhan/Return to Karazhan
+  [49508190] = { 745, "Merged", false, nil, 860 }, -- Karazhan/Return to Karazhan
  }
 
 -- Vanilla Subzone maps
@@ -163,9 +165,9 @@ nodes["DeadminesWestfall"] = {
  [25505090] = { 63, "Dungeon" }, -- Deadmines
 }
 nodes["MaraudonOutside"] = {
- [52102390] = { 232, "Dungeon", false, "Purple Entrance" }, -- Maraudon 30205450 
- [78605600] = { 232, "Dungeon", false, "Orange Entrance" }, -- Maraudon 36006430
- [44307680] = { 232, "Dungeon", false, "Earth Song Falls Entrance" },  -- Maraudon
+ [52102390] = { 232, "Dungeon", false, nil, "Purple Entrance" }, -- Maraudon 30205450 
+ [78605600] = { 232, "Dungeon", false, nil, "Orange Entrance" }, -- Maraudon 36006430
+ [44307680] = { 232, "Dungeon", false, nil, "Earth Song Falls Entrance" },  -- Maraudon
 }
 nodes["NewTinkertownStart"] = {
  [31703450] = { 231, "Dungeon" }, -- Gnomeregan
@@ -190,7 +192,7 @@ nodes["Hellfire"] = {
  --[47605360] = { 248, "Dungeon" }, -- Hellfire Ramparts World 56805310 Stone 48405240 World 57005280
  --[47505200] = { 259, "Dungeon" }, -- The Shattered Halls World 56705270
  --[46005180] = { 256, "Dungeon" }, -- The Blood Furnace World 56305260
- [47205220] = { 248, "Merged", false, 256, 259, 747 }, -- Hellfire Ramparts, The Blood Furnace, The Shattered Halls, Magtheridon's Lair
+ [47205220] = { 248, "Merged", false, nil, 256, 259, 747 }, -- Hellfire Ramparts, The Blood Furnace, The Shattered Halls, Magtheridon's Lair
 }
 nodes["Netherstorm"] = {
  [71705500] = { 257, "Dungeon" }, -- The Botanica
@@ -215,7 +217,7 @@ nodes["Zangarmarsh"] = {
  --[54203450] = { 262, "Dungeon" }, -- Underbog World 35804330
  --[48903570] = { 260, "Dungeon" }, -- Slave Pens World 34204370
  --[51903280] = { 748, "Raid" }, -- Serpentshrine Cavern World 35104280
- [50204100] = { 260, "Merged", false, 261, 262, 748 }, -- Merged Location
+ [50204100] = { 260, "Merged", false, nil, 261, 262, 748 }, -- Merged Location
 }
 minimap["Hellfire"] = {
  [47605360] = { 248, "Dungeon" }, -- Hellfire Ramparts World 56805310 Stone 48405240 World 57005280
@@ -232,7 +234,7 @@ minimap["Zangarmarsh"] = {
 
 -- NORTHREND (16 Dungeons, 9 Raids)
 nodes["BoreanTundra"] = {
- [27602660] = { 282, "Merged", false, 756, 281 },
+ [27602660] = { 282, "Merged", false, nil, 756, 281 },
  -- Oculus same as eye of eternity
  --[27502610] = { "The Nexus", "Dungeon" },
 }
@@ -252,7 +254,7 @@ nodes["HowlingFjord"] = {
  [57204660] = { 286, "Dungeon" }, -- Utgarde Pinnacle
 }
 nodes["IcecrownGlacier"] = { 
- [54409070] = { 276, "Dungeon", false, 278, 280 }, -- The Forge of Souls, Halls of Reflection, Pit of Saron
+ [54409070] = { 276, "Dungeon", false, nil, 278, 280 }, -- The Forge of Souls, Halls of Reflection, Pit of Saron
  [74202040] = { 284, "Dungeon" }, -- Trial of the Champion
  [75202180] = { 757, "Raid" }, -- Trial of the Crusader
  [53808720] = { 758, "Raid" }, -- Icecrown Citadel
@@ -378,9 +380,9 @@ nodes["BrokenIsles"] = {
  [34207210] = { 707, "Dungeon" }, -- Vault of the Wardens
  [47302810] = { 767, "Dungeon" }, -- Neltharion's Lair
  [59003060] = { 727, "Dungeon" }, -- Maw of Souls
- [35402850] = { 762, "Merged", false, 768}, -- The Emerald Nightmare 35102910
- [65003870] = { 721, "Merged", false, 861 }, -- Halls of Valor/Trial of Valor Unmerged: 65203840 64703900
- [46704780] = { 726, "Merged", false, 786 }, -- The Arcway/The Nighthold
+ [35402850] = { 762, "Merged", false, nil, 768}, -- The Emerald Nightmare 35102910
+ [65003870] = { 721, "Merged", false, nil, 861 }, -- Halls of Valor/Trial of Valor Unmerged: 65203840 64703900
+ [46704780] = { 726, "Merged", false, nil, 786 }, -- The Arcway/The Nighthold
  [49104970] = { 800, "Dungeon" }, -- Court of Stars
  [29403300] = { 740, "Dungeon" }, -- Black Rook Hold
 }
@@ -498,8 +500,20 @@ local function setWaypoint(mapFile, coord)
 end
 
 function pluginHandler:OnClick(button, pressed, mapFile, coord)
- if button == "RightButton" and db.tomtom and TomTom then
+ if (not pressed) then return end
+ if (button == "RightButton" and db.tomtom and TomTom) then
   setWaypoint(mapFile, coord)
+  return
+ end
+ if (button == "LeftButton" and db.journal) then
+  if (not EncounterJournal_OpenJournal) then
+   UIParentLoadAddOn('Blizzard_EncounterJournal')
+  end
+  local dungeonID = nodes[mapFile][coord][4]
+  local name, _, _, _, _, _, _, link = EJ_GetInstanceInfo(dungeonID)
+  local difficulty = string.match(link, 'journal:.-:.-:(.-)|h') 
+  if (not dungeonID or not difficulty) then return end
+  EncounterJournal_OpenJournal(difficulty, dungeonID)
  end
 end
 
@@ -511,6 +525,7 @@ local defaults = {
   continentAlpha = 1,
   continent = true,
   tomtom = true,
+  dungeon = false,
  },
 }
 
@@ -566,6 +581,12 @@ local options = {
    desc = "Allow right click to create waypoints with TomTom",
    order = 2,
   },
+  journal = {
+   type = "toggle",
+   name = "Journal Integration",
+   desc = "Allow left click to open journal to dungeon or raid",
+   order = 2,
+  },
  },
 }
 
@@ -590,8 +611,9 @@ function Addon:PLAYER_LOGIN()
     u[1] = name
    end ]]--
    --if (u[2] == "Merged") then
-   local n = 4 -- Start of merged dungeons/raids
+   local n = MERGED_DUNGEONS
    local newName = EJ_GetInstanceInfo(u[1])
+   u[4] = u[1]
    while(u[n]) do
 	if (type(u[n]) == "number") then
 	 local name = EJ_GetInstanceInfo(u[n])
@@ -609,6 +631,7 @@ function Addon:PLAYER_LOGIN()
  for i,v in pairs(minimap) do
   for j,u in pairs(v) do
    if (type(u[1]) == "number") then -- Added because since some nodes are connected to the node table they were being changed before this and this function was then messing it up
+    u[4] = u[1]
     u[1] = EJ_GetInstanceInfo(u[1])
    end
   end
