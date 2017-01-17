@@ -10,8 +10,10 @@ local HandyNotes = LibStub("AceAddon-3.0"):GetAddon("HandyNotes", true)
 if not HandyNotes then return end
 
 local iconDefault = "Interface\\Icons\\TRADE_ARCHAEOLOGY_CHESTOFTINYGLASSANIMALS"
-local iconDungeon = "Interface\\Addons\\HandyNotes_DungeonLocations\\dungeon.tga"
-local iconRaid = "Interface\\Addons\\HandyNotes_DungeonLocations\\raid.tga"
+--local iconDungeon = "Interface\\Addons\\HandyNotes_DungeonLocations\\dungeon.tga"
+--local iconRaid = "Interface\\Addons\\HandyNotes_DungeonLocations\\raid.tga"
+local iconDungeon = "Interface\\MINIMAP\\Dungeon"
+local iconRaid = "Interface\\MINIMAP\\Raid"
 local iconMerged = "Interface\\Addons\\HandyNotes_DungeonLocations\\merged.tga"
 
 local db
@@ -255,8 +257,8 @@ nodes["HowlingFjord"] = {
 }
 nodes["IcecrownGlacier"] = { 
  [54409070] = { 276, "Dungeon", false, nil, 278, 280 }, -- The Forge of Souls, Halls of Reflection, Pit of Saron
- [74202040] = { 284, "Dungeon" }, -- Trial of the Champion
- [75202180] = { 757, "Raid" }, -- Trial of the Crusader
+ [74202040] = { 284, "Dungeon", true }, -- Trial of the Champion
+ [75202180] = { 757, "Raid", true }, -- Trial of the Crusader
  [53808720] = { 758, "Raid" }, -- Icecrown Citadel
 }
 nodes["LakeWintergrasp"] = {
@@ -284,9 +286,10 @@ minimap["IcecrownGlacier"] = {
 }
 
 -- NORTHREND CONTINENT, For things that should be shown or merged only at the continent level
---[[nodes["Northrend"] = {
+nodes["Northrend"] = {
  --[80407600] = { 285, "Dungeon", false, 286 }, -- Utgarde Keep, Utgarde Pinnacle CONTINENT MERGE Location is slightly incorrect
-}]]--
+ [47501750] = { 757, "Merged", false, nil, 284 }, -- Trial of the Crusader and Trial of the Champion
+}
 
 -- CATACLYSM
 nodes["Deepholm"] = {
@@ -526,7 +529,6 @@ local defaults = {
   continent = true,
   tomtom = true,
   journal = true,
-  dungeon = false, -- Don't think this serves a purpose, was probably meant to be journal, will remove in a later update
  },
 }
 
