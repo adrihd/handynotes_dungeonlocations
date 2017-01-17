@@ -522,9 +522,9 @@ end
 
 local defaults = {
  profile = {
-  zoneScale = 2,
+  zoneScale = 3,
   zoneAlpha = 1,
-  continentScale = 2,
+  continentScale = 3,
   continentAlpha = 1,
   continent = true,
   tomtom = true,
