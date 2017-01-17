@@ -1,6 +1,6 @@
 --[[
 Things to do
- Lump close dungeon/raids into one, (nexus/oculus/eoe)
+ Lump close dungeon/raids into one, (nexus/oculus/eoe) (DONE)
  Maybe implement lockout info on tooltip (Don't know if I want too, better addons for tracking it exist)
 ]]--
 
@@ -525,7 +525,8 @@ local defaults = {
   continentAlpha = 1,
   continent = true,
   tomtom = true,
-  dungeon = false,
+  journal = true,
+  dungeon = false, -- Don't think this serves a purpose, was probably meant to be journal, will remove in a later update
  },
 }
 
