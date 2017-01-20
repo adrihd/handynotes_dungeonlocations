@@ -377,7 +377,30 @@ nodes["TanaanJungle"] = {
  [45605360] = { 669, "Raid" }, -- Hellfire Citadel
 }
 
--- Legion Dungeons/Raids for continent map for consistency
+-- Legion Dungeons/Raids for minimap and continent map for consistency
+minimap["Azsuna"] = {
+ [61204110] = { 716, "Dungeon", true },
+ [48308030] = { 707, "Dungeon", true },
+}
+minimap["Highmountain"] = {
+ [49606860] = { 767, "Dungeon", true },
+}
+minimap["Stormheim"] = {
+ [71107280] = { 861, "Raid", true },
+ [72707050] = { 721, "Dungeon", true },
+ [52504530] = { 727, "Dungeon", true },
+}
+minimap["Suramar"] = {
+ [41106170] = { 726, "Dungeon", true },
+ [50806550] = { 800, "Dungeon", true },
+ [44105980] = { 786, "Raid", true },
+}
+minimap["Valsharah"] = {
+ [37205020] = { 740, "Dungeon", true },
+ [59003120] = { 762, "Dungeon", true },
+ [56303680] = { 768, "Raid", true },
+}
+
 nodes["BrokenIsles"] = {
  [38805780] = { 716, "Dungeon" }, -- Eye of Azshara
  [34207210] = { 707, "Dungeon" }, -- Vault of the Wardens
