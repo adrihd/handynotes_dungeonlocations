@@ -15,6 +15,7 @@ local iconDefault = "Interface\\Icons\\TRADE_ARCHAEOLOGY_CHESTOFTINYGLASSANIMALS
 local iconDungeon = "Interface\\MINIMAP\\Dungeon"
 local iconRaid = "Interface\\MINIMAP\\Raid"
 local iconMerged = "Interface\\Addons\\HandyNotes_DungeonLocations\\merged.tga"
+local iconGray = "Interface\\Addons\\HandyNotes_DungeonLocations\\gray.tga"
 
 local db
 local mapToContinent = { }
@@ -422,6 +423,20 @@ local continents = {
 	["Pandaria"] = true,
 }
 
+local LOCKOUTS = { }
+local function updateLockouts()
+ table.wipe(LOCKOUTS)
+ for i=1,GetNumSavedInstances() do
+  local name, id, reset, difficulty, locked, extended, instanceIDMostSig, isRaid, maxPlayers, difficultyName, numEncounters, encounterProgress = GetSavedInstanceInfo(i)
+  if (locked) then
+   --print(name, difficultyName, numEncounters, encounterProgress)
+   if (not LOCKOUTS[name]) then
+    LOCKOUTS[name] = { }
+	LOCKOUTS[name][difficultyName] = encounterProgress .. "/" .. numEncounters
+   end
+  end
+ end
+end
 
 local pluginHandler = { }
 function pluginHandler:OnEnter(mapFile, coord) -- Copied from handynotes
@@ -444,17 +459,28 @@ function pluginHandler:OnEnter(mapFile, coord) -- Copied from handynotes
 		tooltip:SetOwner(self, "ANCHOR_RIGHT")
 	end
 
-	tooltip:SetText(nodeData[1])
-	if (nodeData[3] ~= nil) then
-	 tooltip:AddLine(nodeData[3], nil, nil, nil, true)
-	end
 	
-	--if (lockouts[nodeData[1]]) then
-	-- for i,v in pairs(lockouts[nodeData[1]]) do
-	-- local name, groupType, isHeroic, isChallengeMode, displayHeroic, displayMythic, toggleDifficultyID = GetDifficultyInfo(i)
-	--  tooltip:AddLine(name .. " - (" .. v[1] .. "/" .. v[2] .. ")")
-	-- end
-	--end
+	
+	--print("Node 1", nodeData[1])
+	--table.insert(instances, nodeData[1])
+	
+	 --tooltip:AddLine(nodeData[3], nil, nil, nil, true)
+	local instances = { strsplit("\n", nodeData[1]) }
+	
+
+	updateLockouts()
+	
+	for i, v in pairs(instances) do
+	 --print(i, v)
+	 if (db.lockouts and LOCKOUTS[v]) then
+	  --print("Dungeon/Raid is locked")
+	  for a,b in pairs(LOCKOUTS[v]) do
+ 	   tooltip:AddLine(v .. ": " .. a .. " " .. b, nil, nil, nil, false)
+ 	  end
+	 else
+	  tooltip:AddLine(v, nil, nil, nil, false)
+	 end
+	end
 	tooltip:Show()
 end
 
@@ -469,31 +495,48 @@ end
 do
  local scale, alpha = 1, 1
  local function iter(t, prestate)
- if not t then return nil end
+  if not t then return nil end
 		
- local state, value = next(t, prestate)
- while state do
-  local icon
-  if (value[2] == "Dungeon") then
-   icon = iconDungeon
-  elseif (value[2] == "Raid") then
-   icon = iconRaid
-  elseif (value[2] == "Merged") then
-   icon = iconMerged
-  else
-   icon = iconDefault
-  end
+  local state, value = next(t, prestate)
+  while state do
+   local icon
+   if (value[2] == "Dungeon") then
+    icon = iconDungeon
+   elseif (value[2] == "Raid") then
+    icon = iconRaid
+   elseif (value[2] == "Merged") then
+    icon = iconMerged
+   else
+    icon = iconDefault
+   end
+  
+   local allLocked = true
+   local instances = { strsplit("\n", value[1]) }
+   for i, v in pairs(instances) do
+    if (not LOCKOUTS[v]) then
+     allLocked = false
+    end
+   end
+  
+   if (allLocked and db.lockoutgray) then   
+    icon = iconGray
+   end
+   if (allLocked and db.uselockoutalpha) then
+    alpha = db.lockoutalpha
+   else
+    alpha = isContinent and db.continentAlpha or db.zoneAlpha
+   end
 		
    return state, nil, icon, scale, alpha
-   --state, value = next(t, state)
-  end
+  --state, value = next(t, state)
+  end 
  end
  function pluginHandler:GetNodes(mapFile, isMinimapUpdate, dungeonLevel)
   if (DEBUG) then print(mapFile) end
   local isContinent = continents[mapFile]
   scale = isContinent and db.continentScale or db.zoneScale
   alpha = isContinent and db.continentAlpha or db.zoneAlpha
-
+  
   if (isMinimapUpdate and minimap[mapFile]) then
    return iter, minimap[mapFile]
   end
@@ -552,6 +595,10 @@ local defaults = {
   continent = true,
   tomtom = true,
   journal = true,
+  lockouts = true,
+  lockoutgray = true,
+  uselockoutalpha = false,
+  lockoutalpha = 1,
  },
 }
 
@@ -613,6 +660,36 @@ local options = {
    desc = "Allow left click to open journal to dungeon or raid",
    order = 2,
   },
+  lockoutheader = {
+   type = "header",
+   name = "Lockout Options",
+   order = 25,
+  },
+  lockouts = {
+   type = "toggle",
+   name = "Lockouts",
+   desc = "Show lockout information on tooltips",
+   order = 25.1,
+  },
+  lockoutgray = {
+   type = "toggle",
+   name = "Lockout Gray Icon",
+   desc = "Use gray icon for dungeons and raids that are locked to any extent",
+   order = 25.11,
+  },
+  uselockoutalpha = {
+   type = "toggle",
+   name = "Use Lockout Alpha",
+   desc = "Use a different alpha for dungeons and raids that are locked to any extent",
+   order = 25.2,
+  },
+  lockoutalpha = {
+   type = "range",
+   name = "Lockout Alpha",
+   desc = "The alpha dungeons and raids that are locked to any extent",
+   min = 0, max = 1, step = 0.01,
+   order = 25.3,
+  },
  },
 }
 
@@ -620,6 +697,19 @@ local options = {
 local Addon = CreateFrame("Frame")
 Addon:RegisterEvent("PLAYER_LOGIN")
 Addon:SetScript("OnEvent", function(self, event, ...) return self[event](self, ...) end)
+
+local function updateStuff()
+ updateLockouts()
+ HandyNotes:SendMessage("HandyNotes_NotifyUpdate", "DungeonLocations")
+end
+
+function Addon:PLAYER_ENTERING_WORLD()
+ updateStuff()
+end
+
+function Addon:UPDATE_INSTANCE_INFO()
+ updateStuff()
+end
 
 function Addon:PLAYER_LOGIN()
  HandyNotes:RegisterPluginDB("DungeonLocations", pluginHandler, options)
@@ -689,7 +779,9 @@ function Addon:PLAYER_LOGIN()
    nodes[mapFile] = coords
  end
  
- --self:UpdateLockouts()
+ updateLockouts()
+ Addon:RegisterEvent("PLAYER_ENTERING_WORLD") -- Check for any lockout changes when we zone
+ Addon:RegisterEvent("UPDATE_INSTANCE_INFO") --
 end
 
 -- I only put a few specific nodes on the minimap, so if the minimap is used in a zone then I need to add all zone nodes to it except for the specific ones
@@ -709,16 +801,3 @@ function Addon:PopulateMinimap()
   end
  end
 end
-
--- Looked to see what events SavedInstances was using, seems far more involved than what I am willing to do
---[[function Addon:UpdateLockouts()
- table.wipe(lockouts)
- 
- for i=1,GetNumSavedInstances() do
-  local name, id, reset, difficulty, locked, extended, instanceIDMostSig, isRaid, maxPlayers, difficultyName, numEncounters, encounterProgress = GetSavedInstanceInfo(i)
-  if (locked) then
-   if (not lockouts[name]) then lockouts[name] = { } end
-   lockouts[name][difficulty] = { encounterProgress, numEncounters }
-  end
- end
-end ]]--
