@@ -378,6 +378,11 @@ nodes["TanaanJungle"] = {
  [45605360] = { 669, "Raid" }, -- Hellfire Citadel
 }
 
+-- This seems to be the only legion raid that isn't shown at all
+nodes["Dalaran70"] = {
+ [66406850] = { 777, "Dungeon", true }, -- Assault on Violet Hold
+}
+
 -- Legion Dungeons/Raids for minimap and continent map for consistency
 minimap["Azsuna"] = {
  [61204110] = { 716, "Dungeon", true },
@@ -412,6 +417,7 @@ nodes["BrokenIsles"] = {
  [46704780] = { 726, "Merged", false, nil, 786 }, -- The Arcway/The Nighthold
  [49104970] = { 800, "Dungeon" }, -- Court of Stars
  [29403300] = { 740, "Dungeon" }, -- Black Rook Hold
+ [46606550] = { 777, "Dungeon" }, -- Assault on Violet Hold
 }
 
 local continents = {
