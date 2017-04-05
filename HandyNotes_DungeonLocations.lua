@@ -22,14 +22,20 @@ local db
 local mapToContinent = { }
 local nodes = { }
 local minimap = { } -- For nodes that need precise minimap locations but would look wrong on zone or continent maps
+local alterName = { }
+local extraInfo = { }
 --local lockouts = { }
 
 local MERGED_DUNGEONS = 5 -- Where extra dungeon/raids ids start for merging
 
+
+
 if (DEBUG) then
  HNDL_NODES = nodes
  HNDL_MINIMAP = minimap
+ HNDL_ALTERNAME = alterName
  --HNDL_LOCKOUTS = lockouts
+ 
 end
 
 local internalNodes = {  -- List of zones to be excluded from continent map
@@ -101,11 +107,18 @@ function pluginHandler:OnEnter(mapFile, coord) -- Copied from handynotes
 	
 	for i, v in pairs(instances) do
 	 --print(i, v)
-	 if (db.lockouts and LOCKOUTS[v]) then
-	  --print("Dungeon/Raid is locked")
-	  for a,b in pairs(LOCKOUTS[v]) do
- 	   tooltip:AddLine(v .. ": " .. a .. " " .. b, nil, nil, nil, false)
- 	  end
+	 if (db.lockouts and (LOCKOUTS[v] or (alterName[v] and LOCKOUTS[alterName[v]]))) then
+ 	  if (LOCKOUTS[v]) then
+	   --print("Dungeon/Raid is locked")
+	   for a,b in pairs(LOCKOUTS[v]) do
+ 	    tooltip:AddLine(v .. ": " .. a .. " " .. b, nil, nil, nil, false)
+ 	   end
+	  end
+	  if (alterName[v] and LOCKOUTS[alterName[v]]) then
+	   for a,b in pairs(LOCKOUTS[alterName[v]]) do
+ 	    tooltip:AddLine(v .. ": " .. a .. " " .. b, nil, nil, nil, false)
+ 	   end
+	  end
 	 else
 	  tooltip:AddLine(v, nil, nil, nil, false)
 	 end
@@ -140,17 +153,21 @@ do
    end
   
    local allLocked = true
+   local anyLocked = false
    local instances = { strsplit("\n", value[1]) }
    for i, v in pairs(instances) do
-    if (not LOCKOUTS[v]) then
-     allLocked = false
-    end
+    if (not LOCKOUTS[v] and not LOCKOUTS[alterName[v]]) then
+	 allLocked = false
+    else
+	 anyLocked = true
+	end
    end
   
-   if (allLocked and db.lockoutgray) then   
+   -- I feel like this inverted lockout thing could be done far better
+   if ((anyLocked and db.invertlockout) or (allLocked and not db.invertlockout) and db.lockoutgray) then   
     icon = iconGray
    end
-   if (allLocked and db.uselockoutalpha) then
+   if ((anyLocked and db.invertlockout) or (allLocked and not db.invertlockout) and db.uselockoutalpha) then
     alpha = db.lockoutalpha
    else
     alpha = isContinent and db.continentAlpha or db.zoneAlpha
@@ -228,6 +245,7 @@ local defaults = {
   lockoutgray = true,
   uselockoutalpha = false,
   lockoutalpha = 1,
+  invertlockout = false,
   hideVanilla = false,
   hideOutland = false,
   hideNorthrend = false,
@@ -344,6 +362,12 @@ function Addon:PLAYER_LOGIN()
    min = 0, max = 1, step = 0.01,
    order = 25.3,
   },
+  invertlockout = {
+   type = "toggle",
+   name = L["Invert Lockout"],
+   desc = L["Turn merged icons grey when ANY dungeon or raid listed is locked"],
+   order = 25.4,
+  },
   hideheader = {
    type = "header",
    name = L["Hide Instances"],
@@ -409,6 +433,7 @@ function Addon:PLAYER_LOGIN()
  self:PopulateTable()
  self:PopulateMinimap()
  self:ProcessTable()
+ --self:ProcessExtraInfo()
  
  --name, description, bgImage, buttonImage, loreImage, dungeonAreaMapID, link = EJ_GetInstanceInfo([instanceID])
  -- Populate Dungeon/Raid names based on Journal
@@ -841,6 +866,129 @@ end
 end
 
 function Addon:ProcessTable()
+table.wipe(alterName)
+
+-- These are the same on the english client, I put them here cause maybe they change in other locales.  This list was somewhat automatically generated
+-- I may be over thinking this
+alterName[321] = 1467 -- Mogu'shan Palace
+alterName[758] = 280 -- Icecrown Citadel
+alterName[476] = 1010 -- Skyreach
+alterName[233] = 20 -- Razorfen Downs
+alterName[751] = 196 -- Black Temple
+alterName[536] = 1006 -- Grimrail Depot
+alterName[861] = 1439 -- Trial of Valor
+alterName[756] = 1423 -- The Eye of Eternity
+alterName[716] = 1175 -- Eye of Azshara
+alterName[76] = 334 -- Zul'Gurub
+alterName[77] = 340 -- Zul'Aman
+alterName[757] = 248 -- Trial of the Crusader
+alterName[236] = 1458 -- Stratholme
+alterName[745] = 175 -- Karazhan
+alterName[271] = 1016 -- Ahn'kahet: The Old Kingdom
+alterName[330] = 534 -- Heart of Fear
+alterName[186] = 439 -- Hour of Twilight
+alterName[229] = 32 -- Lower Blackrock Spire
+alterName[279] = 210 -- The Culling of Stratholme
+alterName[385] = 1005 -- Bloodmaul Slag Mines
+alterName[253] = 181 -- Shadow Labyrinth
+alterName[276] = 256 -- Halls of Reflection
+alterName[69] = 1151 -- Lost City of the Tol'vir
+alterName[187] = 448 -- Dragon Soul
+alterName[274] = 1017 -- Gundrak
+alterName[252] = 180 -- Sethekk Halls
+alterName[65] = 1150 -- Throne of the Tides
+alterName[70] = 321 -- Halls of Origination
+alterName[707] = 1044 -- Vault of the Wardens
+alterName[283] = 1297 -- The Violet Hold
+alterName[875] = 1527 -- Tomb of Sargeras
+alterName[75] = 329 -- Baradin Hold
+alterName[800] = 1319 -- Court of Stars
+alterName[64] = 327 -- Shadowfang Keep
+alterName[760] = 257 -- Onyxia's Lair
+alterName[777] = 1209 -- Assault on Violet Hold
+alterName[311] = 473 -- Scarlet Halls
+alterName[755] = 238 -- The Obsidian Sanctum
+alterName[726] = 1190 -- The Arcway
+alterName[275] = 1018 -- Halls of Lightning
+alterName[277] = 213 -- Halls of Stone
+alterName[241] = 24 -- Zul'Farrak
+alterName[762] = 1202 -- Darkheart Thicket
+alterName[786] = 1353 -- The Nighthold
+alterName[727] = 1192 -- Maw of Souls
+alterName[362] = 634 -- Throne of Thunder
+alterName[759] = 244 -- Ulduar
+alterName[317] = 532 -- Mogu'shan Vaults
+alterName[272] = 241 -- Azjol-Nerub
+alterName[558] = 1007 -- Iron Docks
+alterName[247] = 178 -- Auchenai Crypts
+alterName[273] = 215 -- Drak'Tharon Keep
+alterName[324] = 1465 -- Siege of Niuzao Temple
+alterName[754] = 227 -- Naxxramas
+alterName[753] = 240 -- Vault of Archavon
+alterName[286] = 1020 -- Utgarde Pinnacle
+alterName[280] = 252 -- The Forge of Souls
+alterName[67] = 1148 -- The Stonecore
+alterName[747] = 176 -- Magtheridon's Lair
+alterName[258] = 192 -- The Mechanar
+alterName[281] = 1019 -- The Nexus
+alterName[369] = 766 -- Siege of Orgrimmar
+alterName[184] = 1152 -- End Time
+alterName[740] = 1205 -- Black Rook Hold
+alterName[742] = 50 -- Blackwing Lair
+alterName[457] = 900 -- Blackrock Foundry
+alterName[313] = 1469 -- Temple of the Jade Serpent
+alterName[556] = 1003 -- The Everbloom
+alterName[248] = 188 -- Hellfire Ramparts
+alterName[768] = 1350 -- The Emerald Nightmare
+alterName[721] = 1473 -- Halls of Valor
+alterName[231] = 14 -- Gnomeregan
+alterName[900] = 1488 -- Cathedral of Eternal Night
+alterName[257] = 191 -- The Botanica
+alterName[302] = 1466 -- Stormstout Brewery
+alterName[669] = 989 -- Hellfire Citadel
+alterName[559] = 1004 -- Upper Blackrock Spire
+alterName[741] = 48 -- Molten Core
+alterName[78] = 362 -- Firelands
+alterName[547] = 1008 -- Auchindoun
+alterName[537] = 1009 -- Shadowmoon Burial Grounds
+alterName[477] = 897 -- Highmaul
+alterName[261] = 185 -- The Steamvault
+alterName[746] = 177 -- Gruul's Lair
+alterName[303] = 1464 -- Gate of the Setting Sun
+alterName[66] = 323 -- Blackrock Caverns
+alterName[249] = 1154 -- Magisters' Terrace
+alterName[278] = 1153 -- Pit of Saron
+alterName[73] = 314 -- Blackwing Descent
+alterName[316] = 474 -- Scarlet Monastery
+alterName[246] = 472 -- Scholomance
+alterName[226] = 4 -- Ragefire Chasm
+alterName[63] = 326 -- Deadmines
+alterName[227] = 10 -- Blackfathom Deeps
+alterName[285] = 242 -- Utgarde Keep
+alterName[185] = 437 -- Well of Eternity
+alterName[250] = 1013 -- Mana-Tombs
+alterName[312] = 1468 -- Shado-Pan Monastery
+alterName[748] = 194 -- Serpentshrine Cavern
+alterName[320] = 834 -- Terrace of Endless Spring
+alterName[284] = 249 -- Trial of the Champion
+alterName[234] = 16 -- Razorfen Kraul
+alterName[240] = 1 -- Wailing Caverns
+alterName[68] = 1147 -- The Vortex Pinnacle
+alterName[74] = 318 -- Throne of the Four Winds
+alterName[767] = 1207 -- Neltharion's Lair
+alterName[72] = 316 -- The Bastion of Twilight
+alterName[239] = 22 -- Uldaman
+alterName[282] = 1296 -- The Oculus
+alterName[71] = 1149 -- Grim Batol
+alterName[254] = 1011 -- The Arcatraz
+
+-- This is a list of the ones that absolutely do not match in the english client
+alterName[743] = 160 -- Ruins of Ahn'Qiraj -> Ahn'Qiraj Ruins
+alterName[749] = 193 -- The Eye -> Tempest Keep
+
+alterName[761] = 1502 -- The Ruby Sanctum -> Ruby Sanctum
+alterName[744] = 161 -- Temple of Ahn'Qiraj -> Ahn'Qiraj Temple
+
 for i,v in pairs(nodes) do
   for j,u in pairs(v) do
    --[[if (type(u[1]) == "number") then
@@ -850,10 +998,12 @@ for i,v in pairs(nodes) do
    --if (u[2] == "Merged") then
    local n = MERGED_DUNGEONS
    local newName = EJ_GetInstanceInfo(u[1])
+   self:UpdateAlter(u[1], newName)
    u[4] = u[1]
    while(u[n]) do
 	if (type(u[n]) == "number") then
 	 local name = EJ_GetInstanceInfo(u[n])
+	 self:UpdateAlter(u[n],name)
 	 newName = newName .. "\n" .. name
 	else
 	 newName = newName .. "\n" .. u[n]
@@ -901,8 +1051,40 @@ for i,v in pairs(nodes) do
  end
 end
 
+
+-- The goal here is to have a table of IDs that correspond between the GetLFGDungeonInfo and EJ_GetInstanceInfo functions
+-- I check if the names are different and if so then use both when checking for lockouts
+-- This can probably be done better but I don't know how
+-- I'm putting this in because on the english client, certain raids have a different lockout name than their journal counterpart e.g The Eye and Tempest Keep
+-- If it's messed up in english then it's probably messed up elsewhere and I don't even know if this will help
+function Addon:UpdateAlter(id, name)
+ if (alterName[id]) then
+  local alternativeName = GetLFGDungeonInfo(alterName[id])
+  if (alternativeName) then
+   if (alternativeName == name) then
+    --print("EJ and LFG names both match, removing", name, "from table")
+	--alterName[id] = nil
+   else
+    alterName[id] = nil
+    alterName[name] = alternativeName
+    --print("Changing",id,"to",name,"and setting alter value to",alternativeName)
+   end
+  end
+ end
+end
+
+function Addon:ProcessExtraInfo() -- Could use this to add required levels and things, may do later or not
+ table.wipe(extraInfo)
+ if (true) then return end
+ 
+--[[ for i=1,2000 do -- Do this less stupidly
+  local name, typeID, subtypeID, minLevel, maxLevel, recLevel, minRecLevel, maxRecLevel, expansionLevel, groupID, textureFilename, difficulty, maxPlayers, description, isHoliday, bonusRepAmount, minPlayers, isTimeWalker, name2, minGearLevel = GetLFGDungeonInfo(i)
+ end]]
+end
+
 function Addon:FullUpdate()
  self:PopulateTable()
  self:PopulateMinimap()
  self:ProcessTable()
+ --self:ProcessExtraInfo()
 end
