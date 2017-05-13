@@ -6,5 +6,6 @@
 ## RequiredDeps: HandyNotes
 ## SavedVariables: HandyNotes_DungeonLocationsDB
 
+libs\LibQTip-1.0\LibQTip-1.0.lua
 locales\Locales.xml
 HandyNotes_DungeonLocations.lua
