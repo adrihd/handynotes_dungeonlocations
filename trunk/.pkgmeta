@@ -5,8 +5,3 @@ ignore:
 
 required-dependencies:
  - HandyNotes
- 
-externals:
- libs/LibQTip-1.0:
-  url: svn://svn.wowace.com/wow/libqtip-1-0/mainline/trunk
-  tag: latest

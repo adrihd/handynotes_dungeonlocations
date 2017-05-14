@@ -9,7 +9,6 @@ local DEBUG = false
 local HandyNotes = LibStub("AceAddon-3.0"):GetAddon("HandyNotes", true)
 if not HandyNotes then return end
 local L = LibStub("AceLocale-3.0"):GetLocale("HandyNotes_DungeonLocations")
-local LibQTip = LibStub('LibQTip-1.0')
 
 local iconDefault = "Interface\\Icons\\TRADE_ARCHAEOLOGY_CHESTOFTINYGLASSANIMALS"
 --local iconDungeon = "Interface\\Addons\\HandyNotes_DungeonLocations\\dungeon.tga"
@@ -26,10 +25,6 @@ local minimap = { } -- For nodes that need precise minimap locations but would l
 local alterName = { }
 local extraInfo = { }
 --local lockouts = { }
-
-local MERGED_DUNGEONS = 5 -- Where extra dungeon/raids ids start for merging
-
-
 
 if (DEBUG) then
  HNDL_NODES = nodes
@@ -89,22 +84,13 @@ function pluginHandler:OnEnter(mapFile, coord) -- Copied from handynotes
 	end
 	if (not nodeData) then return end
 	
-	--[[local tooltip = self:GetParent() == WorldMapButton and WorldMapTooltip or GameTooltip
+	local tooltip = self:GetParent() == WorldMapButton and WorldMapTooltip or GameTooltip
 	if ( self:GetCenter() > UIParent:GetCenter() ) then -- compare X coordinate
 		tooltip:SetOwner(self, "ANCHOR_LEFT")
 	else
 		tooltip:SetOwner(self, "ANCHOR_RIGHT")
-	end]]--
-	local tooltip = LibQTip:Acquire("HandyNotes_DungeonLocationsTooltip", 2, "LEFT", "RIGHT")
-	self.tooltip = tooltip
-	
+	end
 
-	
-	
-	--print("Node 1", nodeData[1])
-	--table.insert(instances, nodeData[1])
-	
-	 --tooltip:AddLine(nodeData[3], nil, nil, nil, true)
     if (not nodeData.name) then return end
 
 	local instances = { strsplit("\n", nodeData.name) }
@@ -118,30 +104,29 @@ function pluginHandler:OnEnter(mapFile, coord) -- Copied from handynotes
  	  if (LOCKOUTS[v]) then
 	   --print("Dungeon/Raid is locked")
 	   for a,b in pairs(LOCKOUTS[v]) do
- 	    tooltip:AddLine(v, a .. " " .. b)
+		--tooltip:AddLine(v .. ": " .. a .. " " .. b, nil, nil, nil, false)
+		tooltip:AddDoubleLine(v, a .. " " .. b, 1, 1, 1, 1, 1, 1)
  	   end
 	  end
 	  if (alterName[v] and LOCKOUTS[alterName[v]]) then
 	   for a,b in pairs(LOCKOUTS[alterName[v]]) do
- 	    tooltip:AddLine(v, a .. " " .. b)
+		--tooltip:AddLine(v .. ": " .. a .. " " .. b, nil, nil, nil, false)
+		tooltip:AddDoubleLine(v, a .. " " .. b, 1, 1, 1, 1, 1, 1)
  	   end
 	  end
 	 else
-	  tooltip:AddLine(v)
+	  tooltip:AddLine(v, nil, nil, nil, false)
 	 end
 	end
-	tooltip:SmartAnchorTo(self)
 	tooltip:Show()
 end
 
 function pluginHandler:OnLeave(mapFile, coord)
-	--[[if self:GetParent() == WorldMapButton then
-		WorldMapTooltip:Hide()
-	else
-		GameTooltip:Hide()
-	end]]--
-	LibQTip:Release(self.tooltip)
-	self.tooltip = nil
+ if self:GetParent() == WorldMapButton then
+  WorldMapTooltip:Hide()
+ else
+  GameTooltip:Hide()
+ end
 end
 
 do
