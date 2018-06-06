@@ -555,6 +555,17 @@ nodes["Badlands"] = {
   id = 239,
   type = "Dungeon",
  }, -- Uldaman
+ [58463690] = { 
+  id = 239,
+  type = "Dungeon",
+  hideOnMinimap = true,
+ }, -- Uldaman (Secondary Entrance)
+}
+minimap["Badlands"] = {
+ [60683744] = {
+  id = 239,
+  type = "Dungeon"
+ }, -- Uldaman (Secondary Entrance)
 }
 nodes["Barrens"] = {
 [42106660] = {
@@ -638,6 +649,12 @@ nodes["Feralas"] = {
   type = "Dungeon",
   hideOnContinent = true,
  }, -- Dire Maul, probaly dire maul north
+ [77053693] = {
+  id = 230,
+  lfgid = 34,
+  type = "Dungeon",
+  hideOnContinent = true,
+ }, -- Dire Maul (at Lariss Pavillion)
 }
 nodes["Orgrimmar"] = {
  [52405800] = {
@@ -801,6 +818,12 @@ nodes["Westfall"] = {
    type = "Dungeon",
    hideOnContinent = true,
   }, -- Dire Maul, probably dire maul west
+ --[[ [76463590] = {
+   id = 230,
+   lfgid = 34,
+   type = "Dungeon",
+   hideOnContinent = true,
+  },Lariss Pavillion Entrance]]--
  }
 
 -- Vanilla Subzone maps
