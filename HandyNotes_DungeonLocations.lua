@@ -1936,7 +1936,11 @@ end
 -- If it's messed up in english then it's probably messed up elsewhere and I don't even know if this will help
 function Addon:UpdateAlter(id, name)
  if (alterName[id]) then
-  local alternativeName = GetLFGDungeonInfo(alterName[id])
+  local alternativeName, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, alternativeName2 = GetLFGDungeonInfo(alterName[id])
+  --local alternativeName = GetLFGDungeonInfo(alterName[id])
+  if (alternativeName2 and alternativeName == name) then
+	alternativeName = alternativeName2
+  end
   if (alternativeName) then
    if (alternativeName == name) then
     --print("EJ and LFG names both match, removing", name, "from table")
