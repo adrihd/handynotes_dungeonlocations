@@ -1,0 +1,7 @@
+package-as: HandyNotes_DungeonLocations
+
+ignore:
+ - misc
+
+required-dependencies:
+ - HandyNotes
