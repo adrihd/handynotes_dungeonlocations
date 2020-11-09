@@ -112,7 +112,7 @@ do
 	end
 
 	local function iter(t, prestate)
-		--if true then return end
+		if not t then return end
 		local data = t.data
 
 		local state, value = next(data, prestate)
@@ -681,7 +681,7 @@ nodes[69] = { -- Feralas
   lfgid = 34,
   type = "Dungeon",
   showInZone = true,
-  --hideOnContinent = true,
+  hideOnContinent = true,
  }, -- Dire Maul, probably dire maul east
  [60403070] = {
   id = 230,
